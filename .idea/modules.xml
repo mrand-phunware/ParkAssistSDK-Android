@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ParkAssist.iml" filepath="$PROJECT_DIR$/ParkAssist.iml" />
+      <module fileurl="file://$PROJECT_DIR$/parkassistdemo/parkassistdemo.iml" filepath="$PROJECT_DIR$/parkassistdemo/parkassistdemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/sdk/sdk.iml" filepath="$PROJECT_DIR$/sdk/sdk.iml" />
     </modules>
   </component>

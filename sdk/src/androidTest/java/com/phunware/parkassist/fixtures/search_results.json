@@ -1,0 +1,22 @@
+[
+  {
+    "bay_group": "L1 - Row B",
+    "bay_id": 11021,
+    "map": "Level-1",
+    "position": {
+      "x": 659,
+      "y": 752 },
+    "uuid": "45b0d494-4b8e-45d3-ae3f-334fa1afcf5f",
+    "zone": "Level 1"
+  },
+  {
+    "bay_group": "L3 - Row F",
+    "bay_id": 13017,
+    "map": "Level-3",
+    "position": {
+      "x": 767,
+      "y": 660 },
+    "uuid": "755602d9-914a-432a-890a-f58c4be62bb5",
+    "zone": "Level 3"
+  }
+]

@@ -1,0 +1,54 @@
+[
+  {
+    "counts": {
+      "available": 6,
+      "occupied": 163,
+      "out_of_service": 13,
+      "reserved": 9,
+      "timestamp": "2013-08-19T11:45:06.8120000-04:00",
+      "total": 172,
+      "vacant": 9
+    },
+    "id": 1,
+    "name": "Level 2"
+  },
+  {
+    "counts": {
+      "available": 6,
+      "occupied": 152,
+      "out_of_service": 0,
+      "reserved": 5,
+      "timestamp": "2013-08-19T11:44:23.2640000-04:00",
+      "total": 158,
+      "vacant": 6
+    },
+    "id": 2,
+    "name": "Level 3"
+  },
+  {
+    "counts": {
+      "available": 63,
+      "occupied": 240,
+      "out_of_service": 0,
+      "reserved": 0,
+      "timestamp": "2013-08-19T11:46:59.4640000-04:00",
+      "total": 303,
+      "vacant": 63
+    },
+    "id": 3,
+    "name": "Level 4"
+  },
+  {
+    "counts": {
+      "available": 48,
+      "occupied": 71,
+      "out_of_service": 0,
+      "reserved": 7,
+      "timestamp": "2013-08-19T11:40:11.0820000-04:00",
+      "total": 121,
+      "vacant": 50
+    },
+    "id": 4,
+    "name": "Level 1"
+  }
+]
