@@ -1,10 +1,12 @@
 package com.phunware.parkassist;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.util.Log;
 
+import com.loopj.android.http.BinaryHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
 import com.phunware.parkassist.models.ParkingZone;
 import com.phunware.parkassist.models.PlateSearchResult;
 import com.phunware.parkassist.networking.Callback;
@@ -37,7 +39,8 @@ public class ParkAssistSDK {
     private static final String SEARCH_ENDPOINT = "/search.json";
     private static final String THUMBNAIL_ENDPOINT_FORMAT = "/thumbnails/%s.jpg";
     private static final String MAP_IMG_ENDPOINT_FORMAT = "/maps/%s.png";
-    private static final String ZONES_ENDPOING = "/zones.json";
+    private static final String ZONES_ENDPOINT = "/zones.json";
+    private static final String SIGNS_ENDPOINT = "/signs.json";
 
     private static final String PARAMS_PLATE = "plate";
     private static final String PARAMS_LATITUDE = "lat";
@@ -66,8 +69,7 @@ public class ParkAssistSDK {
             paramMap.put(PARAMS_LATITUDE, latitude);
             paramMap.put(PARAMS_LONGITUDE, longitude);
             paramMap.put(PARAMS_PLATE, partialPlate);
-            RequestParams requestParams = new RequestParams(); // intentionally empty
-            ParkAssistHttpClient.get(generatePlateGetUrl(SEARCH_ENDPOINT, paramMap), requestParams,
+            ParkAssistHttpClient.get(generatePlateGetUrl(SEARCH_ENDPOINT, paramMap),
                     new JsonHttpResponseHandler() {
 
                 @Override
@@ -103,11 +105,10 @@ public class ParkAssistSDK {
     public void getZones(Location location, final Callback<List<ParkingZone>> callback) {
         String latitude = LATLNG_FMT.format(location.getLatitude());
         String longitude = LATLNG_FMT.format(location.getLongitude());
-        RequestParams requestParams = new RequestParams(); // intentionally empty
         Map<String, String> paramMap = new HashMap<>();
         paramMap.put(PARAMS_LATITUDE, latitude);
         paramMap.put(PARAMS_LONGITUDE, longitude);
-        ParkAssistHttpClient.get(generateZoneGetURL(ZONES_ENDPOING, paramMap), requestParams,
+        ParkAssistHttpClient.get(generateGetURL(ZONES_ENDPOINT, paramMap),
                 new JsonHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
@@ -136,6 +137,75 @@ public class ParkAssistSDK {
                 });
     }
 
+    public void getVehicleThumbnail(String uuid, Callback<Bitmap> callback) {
+        Location l = new Location("fake provider");
+        getVehicleThumbnail(l, uuid, callback);
+    }
+
+    public void getVehicleThumbnail(Location location, String uuid, final Callback<Bitmap> callback) {
+        String latitude = LATLNG_FMT.format(location.getLatitude());
+        String longitude = LATLNG_FMT.format(location.getLongitude());
+        Map<String, String> params = new HashMap<>();
+        params.put(PARAMS_LATITUDE, latitude);
+        params.put(PARAMS_LONGITUDE, longitude);
+        ParkAssistHttpClient.getImage(generateGetURL(String.format(THUMBNAIL_ENDPOINT_FORMAT, uuid), params),
+                new BinaryHttpResponseHandler() {
+                    @Override
+                    public String[] getAllowedContentTypes() {
+                        String[] contentTypes = {"image/jpeg", "text/html; charset=utf-8"};
+                        return contentTypes;
+                    }
+
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, byte[] binaryData) {
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(binaryData, 0, binaryData.length);
+                        callback.onSuccess(bitmap);
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, byte[] binaryData, Throwable error) {
+                        callback.onFailed(error);
+                    }
+                });
+    }
+
+    public void getMapImage(String mapName, Callback<Bitmap> callback) {
+        Location l = new Location("fake provider");
+        getMapImage(l, mapName, callback);
+    }
+
+    public void getMapImage(Location location, String mapName, final Callback<Bitmap> callback) {
+        String latitude = LATLNG_FMT.format(location.getLatitude());
+        String longitude = LATLNG_FMT.format(location.getLongitude());
+        Map<String, String> params = new HashMap<>();
+        params.put(PARAMS_LATITUDE, latitude);
+        params.put(PARAMS_LONGITUDE, longitude);
+        ParkAssistHttpClient.get(generateGetURL(String.format(MAP_IMG_ENDPOINT_FORMAT, mapName), params),
+                new BinaryHttpResponseHandler() {
+                    @Override
+                    public String[] getAllowedContentTypes() {
+                        String[] contentTypes = {"image/jpeg", "text/html; charset=utf-8", "image/png"};
+                        return contentTypes;
+                    }
+
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, byte[] binaryData) {
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(binaryData, 0, binaryData.length);
+                        callback.onSuccess(bitmap);
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, byte[] binaryData, Throwable error) {
+                        callback.onFailed(error);
+                    }
+                });
+    }
+
+    
+
+    /*
+    Private helper methods
+     */
     private String generatePlateGetUrl(String urlBase, Map<String, String> params) {
         long timestamp = Calendar.getInstance().getTimeInMillis();
         return urlBase + "?" + "site=" + mSiteSlug + "&device=" + getDeviceId() + "&" + PARAMS_PLATE
@@ -144,7 +214,7 @@ public class ParkAssistSDK {
                 + "&" + PARAMS_LONGITUDE + "=" + params.get(PARAMS_LONGITUDE);
     }
 
-    private String generateZoneGetURL(String urlBase, Map<String, String> params) {
+    private String generateGetURL(String urlBase, Map<String, String> params) {
         long timestamp = Calendar.getInstance().getTimeInMillis();
         return urlBase + "?" + "site=" + mSiteSlug + "&device=" + getDeviceId() + "&signature="
                 + generateSignature(params, timestamp) + "&ts=" + timestamp + "&" + PARAMS_LATITUDE
