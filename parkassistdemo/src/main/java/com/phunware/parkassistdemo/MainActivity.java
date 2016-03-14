@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
+
             @Override
             public void onFailed(Throwable e) {
                 Log.d(TAG, e.getLocalizedMessage());
@@ -70,5 +71,6 @@ public class MainActivity extends AppCompatActivity {
 
         mParkSDK.searchPlates("SCL" , plateCallback);
         mParkSDK.getZones(zoneCallback);
+        mParkSDK.getSigns(zoneCallback);
     }
 }

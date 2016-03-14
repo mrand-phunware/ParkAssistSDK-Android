@@ -137,6 +137,45 @@ public class ParkAssistSDK {
                 });
     }
 
+    public void getSigns(Callback<List<ParkingZone>> callback) {
+        Location l = new Location("fake provider");
+        getSigns(l, callback);
+    }
+
+    public void getSigns(Location location, final Callback<List<ParkingZone>> callback) {
+        String latitude = LATLNG_FMT.format(location.getLatitude());
+        String longitude = LATLNG_FMT.format(location.getLongitude());
+        Map<String, String> paramMap = new HashMap<>();
+        paramMap.put(PARAMS_LATITUDE, latitude);
+        paramMap.put(PARAMS_LONGITUDE, longitude);
+        ParkAssistHttpClient.get(generateGetURL(SIGNS_ENDPOINT, paramMap), new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                Log.d(TAG, "Status code: " + statusCode);
+                List<ParkingZone> results = new LinkedList<>();
+                for (int i = 0; i < response.length(); i++) {
+                    try {
+                        if (ParkingZone.isValid(response.getJSONObject(i))) {
+                            results.add(new ParkingZone(response.getJSONObject(i)));
+                        } else {
+                            Log.d(TAG, "Invalid parking zone json: " + response.get(i));
+                        }
+                    } catch (JSONException e) {
+                        callback.onFailed(e);
+                        return;
+                    }
+                }
+                callback.onSuccess(results);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString,
+                                  Throwable throwable) {
+                callback.onFailed(throwable);
+            }
+        });
+    }
+
     public void getVehicleThumbnail(String uuid, Callback<Bitmap> callback) {
         Location l = new Location("fake provider");
         getVehicleThumbnail(l, uuid, callback);
@@ -200,8 +239,6 @@ public class ParkAssistSDK {
                     }
                 });
     }
-
-    
 
     /*
     Private helper methods
