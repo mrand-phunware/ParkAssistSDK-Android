@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.phunware.parkassist.*;
+import com.phunware.parkassist.models.ParkingZone;
 import com.phunware.parkassist.models.PlateSearchResult;
 import com.phunware.parkassist.networking.Callback;
 
@@ -34,6 +35,19 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+        Callback<List<ParkingZone>> zoneCallback = new Callback<List<ParkingZone>>() {
+            @Override
+            public void onSuccess(List<ParkingZone> data) {
+                Log.d(TAG, "Success!" + data);
+            }
+
+            @Override
+            public void onFailed(Throwable e) {
+                Log.d(TAG, e.getLocalizedMessage());
+            }
+        };
+
         mParkSDK.searchPlates("SCL" , callback);
+        mParkSDK.getZones(zoneCallback);
     }
 }
