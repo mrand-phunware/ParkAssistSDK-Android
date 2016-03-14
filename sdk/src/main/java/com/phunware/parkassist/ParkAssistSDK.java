@@ -12,9 +12,7 @@ import com.phunware.parkassist.networking.ParkAssistHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -62,16 +60,13 @@ public class ParkAssistSDK {
         } else {
             String latitude = LATLNG_FMT.format(location.getLatitude());
             String longitude = LATLNG_FMT.format(location.getLongitude());
-            String params = PARAMS_LATITUDE + "=" + latitude + "&" + PARAMS_LONGITUDE
-                    + "=" + longitude + "&" + PARAMS_PLATE +  "=" + partialPlate;
-            Map<String, String> reqMap = new HashMap<>();
-//            reqMap.put(PARAMS_LATITUDE, latitude);
-//            reqMap.put(PARAMS_LONGITUDE, longitude);
-//            reqMap.put(PARAMS_PLATE, partialPlate);
-//            reqMap.put("device", getDeviceId());
-
-            RequestParams requestParams = new RequestParams(reqMap); //params as map
-            ParkAssistHttpClient.get(generateGetUrl(SEARCH_ENDPOINT, params), requestParams, new JsonHttpResponseHandler() {
+            Map<String, String> paramMap = new HashMap<>();
+            paramMap.put(PARAMS_LATITUDE, latitude);
+            paramMap.put(PARAMS_LONGITUDE, longitude);
+            paramMap.put(PARAMS_PLATE, partialPlate);
+            RequestParams requestParams = new RequestParams(); // intentionally empty
+            ParkAssistHttpClient.get(generateGetUrl(SEARCH_ENDPOINT, paramMap), requestParams,
+                    new JsonHttpResponseHandler() {
 
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
@@ -98,11 +93,12 @@ public class ParkAssistSDK {
 
     }
 
-
-    private String generateGetUrl(String urlBase, String params) {
+    private String generateGetUrl(String urlBase, Map<String, String> params) {
         long timestamp = Calendar.getInstance().getTimeInMillis();
-        return urlBase + "?" + "site=" + mSiteSlug + "&device=" + getDeviceId() + "&plate=SCL&signature="
-                + generateSignature(params.replace('&', ','), timestamp) + "&ts=" + timestamp + "&lat=0.000&lon=0.000";
+        return urlBase + "?" + "site=" + mSiteSlug + "&device=" + getDeviceId() + "&" + PARAMS_PLATE
+        + "=" + params.get(PARAMS_PLATE) + "&signature=" + generateSignature(params, timestamp)
+                + "&ts=" + timestamp + "&" + PARAMS_LATITUDE + "=" + params.get(PARAMS_LATITUDE)
+                + "&" + PARAMS_LONGITUDE + "=" + params.get(PARAMS_LONGITUDE);
     }
 
     private String getDeviceId() {
@@ -112,9 +108,11 @@ public class ParkAssistSDK {
         return mDeviceId;
     }
 
-    private String generateSignature(String params, long timestamp) {
-        String input = mAppSecret + "device=" + getDeviceId()+ "," + params + ",site=" + mSiteSlug
-                + ",ts=" + timestamp;
+    private String generateSignature(Map<String, String> params, long timestamp) {
+        String input = mAppSecret + "device=" + getDeviceId()+ "," + PARAMS_LATITUDE + "="
+                + params.get(PARAMS_LATITUDE) + "," + PARAMS_LONGITUDE + "="
+                + params.get(PARAMS_LONGITUDE) + "," + PARAMS_PLATE + "=" + params.get(PARAMS_PLATE)
+                + ",site=" + mSiteSlug + ",ts=" + timestamp;
         String output = "";
         try {
             MessageDigest digest = MessageDigest.getInstance("MD5");
@@ -126,20 +124,19 @@ public class ParkAssistSDK {
         return output;
     }
 
-    private static String byteArrayToHexString(byte[] var0) {
-        StringBuffer var1 = new StringBuffer();
-        byte[] var2 = var0;
-        int var3 = var0.length;
+    private static String byteArrayToHexString(byte[] startBytes) {
+        StringBuilder builder = new StringBuilder();
+        int length = startBytes.length;
 
-        for (int var4 = 0; var4 < var3; ++var4) {
-            byte var5 = var2[var4];
-            int var6 = var5 & 255;
-            if (var6 < 16) {
-                var1.append("0");
+        for (int i = 0; i < length; ++i) {
+            byte b = startBytes[i];
+            int hexInt = b & 255;
+            if (hexInt < 16) {
+                builder.append("0");
             }
-            var1.append(Integer.toHexString(var6));
+            builder.append(Integer.toHexString(hexInt));
         }
 
-        return var1.toString();
+        return builder.toString();
     }
 }
