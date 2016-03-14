@@ -9,16 +9,27 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.phunware.parkassistdemo.MainActivity">
 
-    <TextView
+    <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:text="Hi Molly." />
+        android:layout_centerHorizontal="true"
+        android:id="@+id/plate_input"
+        android:hint="Enter Plate to Search" />
 
-    <ImageView
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/submit_search_button"
+        android:layout_toEndOf="@id/plate_input"
+        android:layout_toRightOf="@id/plate_input"
+        android:layout_margin="4dp"
+        android:text="Search"/>
+
+    <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:layout_alignParentBottom="true"
-        android:id="@+id/imageView"
-        />
+        android:id="@+id/results_recycler"/>
+
 </RelativeLayout>
