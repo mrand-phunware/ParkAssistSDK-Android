@@ -1,5 +1,6 @@
 package com.phunware.parkassistdemo;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.phunware.parkassist.*;
@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         final EditText plateEditText = (EditText)findViewById(R.id.plate_input);
         Button searchButton = (Button)findViewById(R.id.submit_search_button);
 
-        mParkSDK = new ParkAssistSDK("fb6c46aaae7eec46e88721de53b06b59", "ft-lauderdale");
+        mParkSDK = StaticSDK.getInstance(getString(R.string.app_secret), getString(R.string.site_slug));
         final Callback<List<PlateSearchResult>> plateCallback = new Callback<List<PlateSearchResult>>() {
             @Override
             public void onSuccess(List<PlateSearchResult> data) {
@@ -110,8 +110,21 @@ public class MainActivity extends AppCompatActivity {
         public void onBindViewHolder(ResultsHolder holder, int position) {
             if (mSearchResults.size() >= position) {
                 PlateSearchResult result = mSearchResults.get(position);
-                holder.zoneText.setText(result.zone);
-                holder.bayText.setText(result.bayGroup);
+                holder.zoneText.setText(result.getZone());
+                holder.bayText.setText(result.getBayGroup());
+                holder.itemView.setTag(result);
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        PlateSearchResult selectedPlate = (PlateSearchResult)v.getTag();
+                        Intent i = new Intent(getBaseContext(), DetailActivity.class);
+                        i.putExtra("map", selectedPlate.getMapName());
+                        i.putExtra("UUID", selectedPlate.getUuid());
+                        i.putExtra("xCoord", selectedPlate.getX());
+                        i.putExtra("yCoord", selectedPlate.getY());
+                        startActivity(i);
+                    }
+                });
             }
         }
 

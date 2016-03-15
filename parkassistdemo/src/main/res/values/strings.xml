@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Park Assist Demo</string>
+    <string name="app_secret">fb6c46aaae7eec46e88721de53b06b59</string>
+    <string name="site_slug">ft-lauderdale</string>
 </resources>
