@@ -27,7 +27,10 @@ import java.util.UUID;
 import cz.msebera.android.httpclient.Header;
 
 /**
- * Created by mrand on 3/10/16.
+ * Public class for interacting with ParkAssist Web api
+ * Developer should create a single instance of ParkAssistSDK with their app secret and site slug
+ * and use that instance for all calls to the API
+ *
  */
 public class ParkAssistSDK {
 
@@ -47,16 +50,45 @@ public class ParkAssistSDK {
     private static final String PARAMS_LONGITUDE = "lon";
     private static final DecimalFormat LATLNG_FMT = new DecimalFormat("#0.000");
 
+    /**
+     * Creates an instance of ParkAssistSDK for communicating with the ParkAssist servers securely
+     *
+     * @param appSecret Your shared secret key
+     * @param siteSlug String identifying the parking facility
+     */
     public ParkAssistSDK(String appSecret, String siteSlug) {
         this.mAppSecret = appSecret;
         this.mSiteSlug = siteSlug;
     }
 
+    /**
+     * Given a partial license plate, returns up to 3 possible matches from parking garage along
+     * with details allowing access to vehicle thumbnail images or parking maps
+     *
+     * @param partialPlate The license plate text to query, eg "ABC123", "XYZ". The plate text must
+     *                     only be comprised of uppercase Alphanumeric characters (do not include
+     *                     whitespace, punctuation)
+     * @param callback Callback object to handle success or failure. Success block will have a
+     *                 list of up to 3 possible @PlateSearchResult items returned from the server
+     */
     public void searchPlates(String partialPlate, Callback<List<PlateSearchResult>> callback) {
         Location l = new Location("Fake provider");
         searchPlates(partialPlate, l, callback);
     }
 
+    /**
+     * Given a partial license plate, returns up to 3 possible matches from parking garage along
+     * with details allowing access to vehicle thumbnail images or parking maps
+     *
+     * @param partialPlate The license plate text to query, eg "ABC123", "XYZ". The plate text must
+     *                     only be comprised of uppercase Alphanumeric characters (do not include
+     *                     whitespace, punctuation)
+     * @param location Location object with the latitude and longitude of the device making the
+     *                 request
+     * @param callback Callback object to handle success or failure. Success block will have a
+     *                 list of up to 3 possible @PlateSearchResult items returned from the server
+     *
+     */
     public void searchPlates(String partialPlate, Location location,
                              final Callback<List<PlateSearchResult>> callback) {
         if (partialPlate == null || partialPlate.length() < 3) {
@@ -97,11 +129,25 @@ public class ParkAssistSDK {
 
     }
 
+    /**
+     * returns the vehicle counts in each zone at the property.
+     *
+     * @param callback Callback object to handle success or failure. Success block includes a list
+     *                 of ParkingZone results returned from the server
+     */
     public void getZones(Callback<List<ParkingZone>> callback) {
         Location fakeLocation = new Location("fake provider");
         getZones(fakeLocation, callback);
     }
 
+    /**
+     * returns the vehicle counts in each zone at the property.
+     *
+     * @param location Location object with the latitude and longitude of the device making the
+     *                 request
+     * @param callback Callback object to handle success or failure. Success block includes a list
+     *                 of ParkingZone results returned from the server
+     */
     public void getZones(Location location, final Callback<List<ParkingZone>> callback) {
         String latitude = LATLNG_FMT.format(location.getLatitude());
         String longitude = LATLNG_FMT.format(location.getLongitude());
@@ -137,11 +183,26 @@ public class ParkAssistSDK {
                 });
     }
 
+    /**
+     * returns information about the signs at the parking facility in ParkingZone format
+     *
+     * @param callback Callback object to handle success or failure. Success block includes a list
+     *                 of ParkingZone results returned from the server
+     */
     public void getSigns(Callback<List<ParkingZone>> callback) {
         Location l = new Location("fake provider");
         getSigns(l, callback);
     }
 
+    /**
+     * returns information about the signs at the parking facility in ParkingZone format
+     *
+     *
+     * @param location Location object with the latitude and longitude of the device making the
+     *                 request
+     * @param callback Callback object to handle success or failure. Success block includes a list
+     *                 of ParkingZone results returned from the server
+     */
     public void getSigns(Location location, final Callback<List<ParkingZone>> callback) {
         String latitude = LATLNG_FMT.format(location.getLatitude());
         String longitude = LATLNG_FMT.format(location.getLongitude());
@@ -176,11 +237,28 @@ public class ParkAssistSDK {
         });
     }
 
+    /**
+     * returns a low-resolution image of a search result vehicle
+     *
+     * @param uuid Unique identifier associated with search result
+     *
+     * @param callback Callback object, success block takes Bitmap image from server
+     */
     public void getVehicleThumbnail(String uuid, Callback<Bitmap> callback) {
         Location l = new Location("fake provider");
         getVehicleThumbnail(l, uuid, callback);
     }
 
+    /**
+     * returns a low-resolution image of a search result vehicle
+     *
+     * @param location Location object representing the latitude and longitude of device making
+     *                 the request
+     *
+     * @param uuid Unique identifier associated with search result
+     *
+     * @param callback Callback object, success block takes Bitmap image from server
+     */
     public void getVehicleThumbnail(Location location, String uuid, final Callback<Bitmap> callback) {
         String latitude = LATLNG_FMT.format(location.getLatitude());
         String longitude = LATLNG_FMT.format(location.getLongitude());
@@ -208,11 +286,25 @@ public class ParkAssistSDK {
                 });
     }
 
+    /**
+     * returns an image of a map at the parking facility
+     *
+     * @param mapName Name of the requested map
+     * @param callback Callback object, success block receives a Bitmap image of the map
+     */
     public void getMapImage(String mapName, Callback<Bitmap> callback) {
         Location l = new Location("fake provider");
         getMapImage(l, mapName, callback);
     }
 
+    /**
+     * returns an image of a map at the parking facility
+     *
+     * @param location Location object representing latitude and longitude of device making the
+     *                 request
+     * @param mapName Name of the requested map
+     * @param callback Callback object, success block receives a Bitmap image of the map
+     */
     public void getMapImage(Location location, String mapName, final Callback<Bitmap> callback) {
         String latitude = LATLNG_FMT.format(location.getLatitude());
         String longitude = LATLNG_FMT.format(location.getLongitude());

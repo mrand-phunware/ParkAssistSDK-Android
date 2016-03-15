@@ -6,7 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Created by mrand on 3/10/16.
+ * Parking Zone/Parking Sign details model
  */
 public class ParkingZone {
     private SpaceCounts mSpaceCounts;
@@ -18,12 +18,21 @@ public class ParkingZone {
     private static final String ID_KEY = "id";
     private static final String NAME_KEY = "name";
 
+    /**
+     *
+     * @param zoneJson JSONObject returned from server
+     * @return whether the JSON has the correct keys to create a ParkingZone object
+     */
     public static boolean isValid(JSONObject zoneJson) {
         return (zoneJson.has(ID_KEY)
             && zoneJson.has(COUNT_KEY)
             && zoneJson.has(NAME_KEY));
     }
 
+    /**
+     * creates ParkingZone object from JSON returned from server
+     * @param zoneJson JSONObject from ParkAssist server
+     */
     public ParkingZone(JSONObject zoneJson) {
         try {
             this.mId = zoneJson.getInt(ID_KEY);
@@ -34,12 +43,36 @@ public class ParkingZone {
         }
     }
 
+    /**
+     *
+     * @return zone name or parking sign name
+     */
     public String getZoneName() {
         return mZoneName;
     }
 
+    /**
+     *
+     * @return number of available bays in zone (Bays with no vehicle parked and no reservatio)
+     */
     public int getAvailableSpaces() {
         return mSpaceCounts.available;
+    }
+
+    /**
+     *
+     * @return total number of spaces in zone
+     */
+    public int getTotalSpaces() {
+        return mSpaceCounts.total;
+    }
+
+    /**
+     *
+     * @return number of reserved spaces in zone
+     */
+    public int getReservedSpaces() {
+        return mSpaceCounts.reserved;
     }
 
     private class SpaceCounts {
@@ -48,15 +81,16 @@ public class ParkingZone {
         Out of Service: Bays not currently monitored due to a malfunction or sensor downtime
         Occupied: Bays with a vehicle parked
         Vacant: Bays with no vehicle parked
-        Reserved: Bays with an assigned reservation; can overlap with out of service, vacant, and occupied bays
+        Reserved: Bays with an assigned reservation; can overlap with out of service, vacant, and
+        occupied bays
         Available: Bays with no vehicle parked and no reservation
          */
-        public int available;
-        public int occupied;
-        public int outOfService;
-        public int reserved;
-        public int total;
-        public int vacant;
+        protected int available;
+        protected int occupied;
+        protected int outOfService;
+        protected int reserved;
+        protected int total;
+        protected int vacant;
 
         private static final String AVAILABLE_KEY = "available";
         private static final String OCCUPIED_KEY = "occupied";

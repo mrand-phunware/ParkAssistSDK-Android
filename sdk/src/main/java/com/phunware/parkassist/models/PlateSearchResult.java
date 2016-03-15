@@ -6,15 +6,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Created by mrand on 3/10/16.
+ * model object for search results from ParkAssist API
  */
 public class PlateSearchResult {
-    public String bayGroup;
-    public int bayId;
-    public String uuid;
-    public String zone;
-    public String mapName;
-    public Position position;
+    private String mBayGroup;
+    private int mBayId;
+    private String mUuid;
+    private String mZone;
+    private String mMapName;
+    private Position mPosition;
 
     private static final String BAY_GROUP_KEY = "bay_group";
     private static final String BAY_ID_KEY = "bay_id";
@@ -38,24 +38,81 @@ public class PlateSearchResult {
     }
      */
 
+    /**
+     * Create search result object from server JSON
+     * @param jsonObject JSONObject returned from ParkAssist API
+     */
     public PlateSearchResult(JSONObject jsonObject) {
         try {
-            this.bayGroup = jsonObject.getString(BAY_GROUP_KEY);
-            this.bayId = jsonObject.getInt(BAY_ID_KEY);
-            this.uuid = jsonObject.getString(UUID_KEY);
-            this.mapName = jsonObject.getString(MAP_NAME_KEY);
-            this.zone = jsonObject.getString(ZONE_KEY);
-            this.position = new Position(jsonObject.getJSONObject(POSITION_KEY));
+            this.mBayGroup = jsonObject.getString(BAY_GROUP_KEY);
+            this.mBayId = jsonObject.getInt(BAY_ID_KEY);
+            this.mUuid = jsonObject.getString(UUID_KEY);
+            this.mMapName = jsonObject.getString(MAP_NAME_KEY);
+            this.mZone = jsonObject.getString(ZONE_KEY);
+            this.mPosition = new Position(jsonObject.getJSONObject(POSITION_KEY));
         } catch (JSONException e) {
             Log.e(TAG, "Error parsing JSON: " + e.getLocalizedMessage());
         }
     }
 
-    public class Position {
-        public int x;
-        public int y;
+    /**
+     *
+     * @return name of bay group
+     */
+    public String getBayGroup() {
+        return mBayGroup;
+    }
 
-        public Position(JSONObject positionObject) {
+    /**
+     * @return bay identifier
+     */
+    public int getBayId() {
+        return mBayId;
+    }
+
+    /**
+     *
+     * @return unique identifier used in image calls
+     */
+    public String getUuid() {
+        return mUuid;
+    }
+
+    /**
+     *
+     * @return parking zone
+     */
+    public String getZone() {
+        return mZone;
+    }
+
+    /**
+     *
+     * @return name of map
+     */
+    public String getMapName() {
+        return mMapName;
+    }
+
+    /**
+     * @return Number of horizontal pixels from top left of vehicle location on map image
+     */
+    public int getX() {
+        return mPosition.x;
+    }
+
+    /**
+     * @return  Number of vertical pixels from top left of vehicle location on map image
+     */
+    public int getY() {
+        return mPosition.y;
+    }
+
+    protected class Position {
+        protected int x;
+        protected int y;
+
+        protected Position(JSONObject positionObject) {
             try {
                 this.x = positionObject.getInt("x");
                 this.y = positionObject.getInt("y");
