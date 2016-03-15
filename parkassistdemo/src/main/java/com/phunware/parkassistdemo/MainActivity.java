@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ParkAssistSDK mParkSDK;
     private List<PlateSearchResult> mSearchResults;
+    private List<ParkingZone> mZones;
     private static final String TAG = "DemoActivity";
 
     @Override
@@ -33,8 +34,13 @@ public class MainActivity extends AppCompatActivity {
         final RecyclerView resultsRecycler = (RecyclerView)findViewById(R.id.results_recycler);
         resultsRecycler.setLayoutManager(new LinearLayoutManager(this));
         resultsRecycler.setAdapter(new ResultsAdapter());
+        final RecyclerView zoneRecycler = (RecyclerView)findViewById(R.id.zone_recycler);
+        zoneRecycler.setLayoutManager(new LinearLayoutManager(this));
+        zoneRecycler.setAdapter(new ZoneAdapter());
         final EditText plateEditText = (EditText)findViewById(R.id.plate_input);
         Button searchButton = (Button)findViewById(R.id.submit_search_button);
+        Button zoneButton = (Button)findViewById(R.id.zone_button);
+        Button signButton = (Button)findViewById(R.id.sign_button);
 
         mParkSDK = StaticSDK.getInstance(getString(R.string.app_secret), getString(R.string.site_slug));
         final Callback<List<PlateSearchResult>> plateCallback = new Callback<List<PlateSearchResult>>() {
@@ -51,31 +57,11 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-
-        searchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                plateEditText.clearFocus();
-                mParkSDK.searchPlates(plateEditText.getText().toString(), plateCallback);
-            }
-        });
-
-        final Callback thumbCallback = new Callback<Bitmap>() {
-            @Override
-            public void onSuccess(Bitmap data) {
-                Log.d(TAG, "Success!");
-            }
-
-            @Override
-            public void onFailed(Throwable e) {
-                Log.e(TAG, e.getLocalizedMessage());
-            }
-        };
-
-        Callback<List<ParkingZone>> zoneCallback = new Callback<List<ParkingZone>>() {
+        final Callback<List<ParkingZone>> zoneCallback = new Callback<List<ParkingZone>>() {
             @Override
             public void onSuccess(List<ParkingZone> data) {
-                Log.d(TAG, "Success!" + data);
+                mZones = data;
+                zoneRecycler.getAdapter().notifyDataSetChanged();
             }
 
             @Override
@@ -84,8 +70,27 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                plateEditText.clearFocus();
+                mParkSDK.searchPlates(plateEditText.getText().toString(), plateCallback);
+            }
+        });
+        zoneButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mParkSDK.getZones(zoneCallback);
+            }
+        });
+        signButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mParkSDK.getSigns(zoneCallback);
+            }
+        });
+
         mParkSDK.getZones(zoneCallback);
-        mParkSDK.getSigns(zoneCallback);
     }
 
     private class ResultsHolder extends RecyclerView.ViewHolder {
@@ -131,6 +136,45 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public int getItemCount() {
             return mSearchResults != null ? mSearchResults.size() : 0;
+        }
+    }
+
+    private class ZoneHolder extends RecyclerView.ViewHolder {
+        public TextView zoneName;
+        public TextView available;
+        public TextView reserved;
+        public TextView total;
+
+        public ZoneHolder(View v) {
+            super(v);
+            zoneName = (TextView)v.findViewById(R.id.zone_name);
+            available = (TextView)v.findViewById(R.id.available_spots);
+            reserved = (TextView)v.findViewById(R.id.reserved_spots);
+            total = (TextView)v.findViewById(R.id.total_spots);
+        }
+    }
+
+    private class ZoneAdapter extends RecyclerView.Adapter<ZoneHolder> {
+
+        @Override
+        public ZoneHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return new ZoneHolder(getLayoutInflater().inflate(R.layout.item_zone, parent, false));
+        }
+
+        @Override
+        public void onBindViewHolder(ZoneHolder holder, int position) {
+            if (mZones.size() >= position) {
+                ParkingZone result = mZones.get(position);
+                holder.zoneName.setText(result.getZoneName());
+                holder.available.setText("Available: " + result.getAvailableSpaces());
+                holder.reserved.setText("Reserved: " + result.getReservedSpaces());
+                holder.total.setText("Total: " + result.getTotalSpaces());
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return mZones != null ? mZones.size() : 0;
         }
     }
 }

@@ -28,8 +28,38 @@
 
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_alignParentBottom="true"
+        android:layout_height="200dp"
+        android:background="@android:color/holo_blue_light"
+        android:layout_below="@id/plate_input"
         android:id="@+id/results_recycler"/>
+
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="#bebebe"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/zone_recycler"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_above="@id/zone_recycler">
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="12dp"
+            android:text="Zones"
+            android:id="@+id/zone_button"/>
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="12dp"
+            android:text="Signs"
+            android:id="@+id/sign_button"/>
+    </LinearLayout>
 
 </RelativeLayout>
