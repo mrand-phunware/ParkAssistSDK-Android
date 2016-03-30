@@ -1,13 +1,26 @@
 package com.phunware.parkassist.models;
 
-import android.util.Log;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
  * Parking Zone/Parking Sign details model
+ *
  */
+//sample result:
+//{
+//        "counts": {
+//        "available": 6,
+//        "occupied": 163,
+//        "out_of_service": 13,
+//        "reserved": 9,
+//        "timestamp": "2013-08-19T11:45:06.8120000-04:00",
+//        "total": 172,
+//        "vacant": 9
+//        },
+//        "id": 1,
+//        "name": "Level 2"
+//        }
 public class ParkingZone {
     private SpaceCounts mSpaceCounts;
     private int mId;
@@ -32,8 +45,16 @@ public class ParkingZone {
      *
      * @return zone name or parking sign name
      */
-    public String getZoneName() {
+    public String getName() {
         return mZoneName;
+    }
+
+    /**
+     *
+     * @return zone or parking sign identifier
+     */
+    public int getId() {
+        return mId;
     }
 
     /**

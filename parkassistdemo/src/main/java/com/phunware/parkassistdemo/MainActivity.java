@@ -1,7 +1,6 @@
 package com.phunware.parkassistdemo;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -165,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
         public void onBindViewHolder(ZoneHolder holder, int position) {
             if (mZones.size() >= position) {
                 ParkingZone result = mZones.get(position);
-                holder.zoneName.setText(result.getZoneName());
+                holder.zoneName.setText(result.getName());
                 holder.available.setText("Available: " + result.getAvailableSpaces());
                 holder.reserved.setText("Reserved: " + result.getReservedSpaces());
                 holder.total.setText("Total: " + result.getTotalSpaces());
