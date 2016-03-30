@@ -1,8 +1,5 @@
 package com.phunware.parkassist.networking;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.BinaryHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -48,8 +45,7 @@ public class ParkAssistHttpClient implements ParkAssistNetworkingInterface {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] binaryData) {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(binaryData, 0, binaryData.length);
-                responseHandler.onSuccess(bitmap);
+                responseHandler.onSuccess(binaryData);
             }
 
             @Override

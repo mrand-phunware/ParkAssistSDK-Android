@@ -1,6 +1,7 @@
 package com.phunware.parkassist;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.util.Log;
 
@@ -254,7 +255,8 @@ public class ParkAssistSDK {
         httpClient.getImage(generateGetURL(String.format(THUMBNAIL_ENDPOINT_FORMAT, uuid), params),
                 new ParkAssistNetworkingInterface.ParkAssistImageResponseInterface() {
                     @Override
-                    public void onSuccess(Bitmap image) {
+                    public void onSuccess(byte[] imageData) {
+                        Bitmap image = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
                         callback.onSuccess(image);
                     }
 
@@ -294,7 +296,8 @@ public class ParkAssistSDK {
                 new ParkAssistNetworkingInterface.ParkAssistImageResponseInterface() {
 
                     @Override
-                    public void onSuccess(Bitmap bitmap) {
+                    public void onSuccess(byte[] imageData) {
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
                         callback.onSuccess(bitmap);
                     }
 

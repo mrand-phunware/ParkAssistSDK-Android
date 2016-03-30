@@ -1,7 +1,5 @@
 package com.phunware.parkassist.networking;
 
-import android.graphics.Bitmap;
-
 import org.json.JSONArray;
 
 /**
@@ -35,10 +33,10 @@ public interface ParkAssistNetworkingInterface {
     }
 
     /**
-     * interface for passing Bitmaps received from the server back to the application layer
+     * interface for passing image data received from the server back to the application layer
      */
     interface ParkAssistImageResponseInterface {
-        void onSuccess(Bitmap image);
+        void onSuccess(byte[] imageData);
 
         void onFailure(Throwable e);
     }
