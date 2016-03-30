@@ -1,29 +1,63 @@
 package com.phunware.parkassist.networking;
 
-import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
+import com.loopj.android.http.BinaryHttpResponseHandler;
+import com.loopj.android.http.JsonHttpResponseHandler;
+
+import org.json.JSONArray;
+
+
+import cz.msebera.android.httpclient.Header;
 
 /**
  * Created by mrand on 3/10/16.
  */
-public class ParkAssistHttpClient {
+public class ParkAssistHttpClient implements ParkAssistNetworkingInterface {
     private static final String BASE_URL = "https://insights.parkassist.com/find_your_car";
 
     private static AsyncHttpClient client = new AsyncHttpClient();
 
-    public static void get(String url, AsyncHttpResponseHandler responseHandler) {
-        client.get(getAbsoluteUrl(url), responseHandler);
+    @Override
+    public void getJSON(String URL, final ParkAssistJSONResponseInterface responseHandler) {
+        JsonHttpResponseHandler httpHandler = new JsonHttpResponseHandler() {
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                responseHandler.onSuccess(response);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString,
+                                  Throwable throwable) {
+                responseHandler.onFailure(throwable);
+            }
+        };
+        client.get(getAbsoluteUrl(URL), httpHandler);
     }
 
-    public static void getImage(String url, AsyncHttpResponseHandler responseHandler) {
-        client.get(getAbsoluteUrl(url), responseHandler);
-    }
+    @Override
+    public void getImage(String URL, final ParkAssistImageResponseInterface responseHandler) {
+        BinaryHttpResponseHandler imageHandler = new BinaryHttpResponseHandler() {
+            @Override
+            public String[] getAllowedContentTypes() {
+                return new String[]{"image/jpeg", "text/html; charset=utf-8", "image/png"};
+            }
 
-    public static void post(String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
-        client.post(getAbsoluteUrl(url), params, responseHandler);
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] binaryData) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(binaryData, 0, binaryData.length);
+                responseHandler.onSuccess(bitmap);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] binaryData, Throwable error) {
+                responseHandler.onFailure(error);
+            }
+        };
+        client.get(getAbsoluteUrl(URL), imageHandler);
     }
 
     private static String getAbsoluteUrl(String relativeUrl) {

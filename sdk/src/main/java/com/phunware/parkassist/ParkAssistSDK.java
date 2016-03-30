@@ -1,16 +1,14 @@
 package com.phunware.parkassist;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.util.Log;
 
-import com.loopj.android.http.BinaryHttpResponseHandler;
-import com.loopj.android.http.JsonHttpResponseHandler;
 import com.phunware.parkassist.models.ParkingZone;
 import com.phunware.parkassist.models.PlateSearchResult;
 import com.phunware.parkassist.networking.Callback;
 import com.phunware.parkassist.networking.ParkAssistHttpClient;
+import com.phunware.parkassist.networking.ParkAssistNetworkingInterface;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import cz.msebera.android.httpclient.Header;
 
 /**
  * Public class for interacting with ParkAssist Web api
@@ -37,6 +34,7 @@ public class ParkAssistSDK {
     private String mAppSecret;
     private String mSiteSlug;
     private String mDeviceId;
+    private ParkAssistHttpClient httpClient;
 
     private static final String TAG = "ParkAssistSDK";
     private static final String SEARCH_ENDPOINT = "/search.json";
@@ -59,6 +57,7 @@ public class ParkAssistSDK {
     public ParkAssistSDK(String appSecret, String siteSlug) {
         this.mAppSecret = appSecret;
         this.mSiteSlug = siteSlug;
+        this.httpClient = new ParkAssistHttpClient();
     }
 
     /**
@@ -101,30 +100,28 @@ public class ParkAssistSDK {
             paramMap.put(PARAMS_LATITUDE, latitude);
             paramMap.put(PARAMS_LONGITUDE, longitude);
             paramMap.put(PARAMS_PLATE, partialPlate);
-            ParkAssistHttpClient.get(generatePlateGetUrl(SEARCH_ENDPOINT, paramMap),
-                    new JsonHttpResponseHandler() {
+            httpClient.getJSON(generatePlateGetUrl(SEARCH_ENDPOINT, paramMap),
+                    new ParkAssistNetworkingInterface.ParkAssistJSONResponseInterface() {
 
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                    Log.d(TAG, "Status code: " + statusCode);
-                    List<PlateSearchResult> results = new LinkedList<>();
-                    for (int i = 0; i < response.length(); i++) {
-                        try {
-                            results.add(i, new PlateSearchResult(response.getJSONObject(i)));
-                        } catch (JSONException e) {
-                            callback.onFailed(e);
-                            return;
+                        @Override
+                        public void onSuccess(JSONArray response) {
+                            List<PlateSearchResult> results = new LinkedList<>();
+                            for (int i = 0; i < response.length(); i++) {
+                                try {
+                                    results.add(i, new PlateSearchResult(response.getJSONObject(i)));
+                                } catch (JSONException e) {
+                                    callback.onFailed(e);
+                                    return;
+                                }
+                            }
+                            callback.onSuccess(results);
                         }
-                    }
-                    callback.onSuccess(results);
-                }
 
-                @Override
-                public void onFailure(int statusCode, Header[] headers, String responseString,
-                                      Throwable throwable) {
-                    callback.onFailed(throwable);
-                }
-            });
+                        @Override
+                        public void onFailure(Throwable throwable) {
+                            callback.onFailed(throwable);
+                        }
+                    });
         }
 
     }
@@ -154,19 +151,14 @@ public class ParkAssistSDK {
         Map<String, String> paramMap = new HashMap<>();
         paramMap.put(PARAMS_LATITUDE, latitude);
         paramMap.put(PARAMS_LONGITUDE, longitude);
-        ParkAssistHttpClient.get(generateGetURL(ZONES_ENDPOINT, paramMap),
-                new JsonHttpResponseHandler() {
+        httpClient.getJSON(generateGetURL(ZONES_ENDPOINT, paramMap),
+                new ParkAssistNetworkingInterface.ParkAssistJSONResponseInterface() {
                     @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                        Log.d(TAG, "Status code: " + statusCode);
+                    public void onSuccess(JSONArray response) {
                         List<ParkingZone> results = new LinkedList<>();
                         for (int i = 0; i < response.length(); i++) {
                             try {
-                                if (ParkingZone.isValid(response.getJSONObject(i))) {
-                                    results.add(new ParkingZone(response.getJSONObject(i)));
-                                } else {
-                                    Log.d(TAG, "Invalid parking zone json: " + response.get(i));
-                                }
+                                results.add(new ParkingZone(response.getJSONObject(i)));
                             } catch (JSONException e) {
                                 callback.onFailed(e);
                                 return;
@@ -176,8 +168,7 @@ public class ParkAssistSDK {
                     }
 
                     @Override
-                    public void onFailure(int statusCode, Header[] headers, String responseString,
-                                          Throwable throwable) {
+                    public void onFailure(Throwable throwable) {
                         callback.onFailed(throwable);
                     }
                 });
@@ -209,32 +200,27 @@ public class ParkAssistSDK {
         Map<String, String> paramMap = new HashMap<>();
         paramMap.put(PARAMS_LATITUDE, latitude);
         paramMap.put(PARAMS_LONGITUDE, longitude);
-        ParkAssistHttpClient.get(generateGetURL(SIGNS_ENDPOINT, paramMap), new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                Log.d(TAG, "Status code: " + statusCode);
-                List<ParkingZone> results = new LinkedList<>();
-                for (int i = 0; i < response.length(); i++) {
-                    try {
-                        if (ParkingZone.isValid(response.getJSONObject(i))) {
-                            results.add(new ParkingZone(response.getJSONObject(i)));
-                        } else {
-                            Log.d(TAG, "Invalid parking zone json: " + response.get(i));
+        httpClient.getJSON(generateGetURL(SIGNS_ENDPOINT, paramMap),
+                new ParkAssistNetworkingInterface.ParkAssistJSONResponseInterface() {
+                    @Override
+                    public void onSuccess(JSONArray response) {
+                        List<ParkingZone> results = new LinkedList<>();
+                        for (int i = 0; i < response.length(); i++) {
+                            try {
+                                results.add(new ParkingZone(response.getJSONObject(i)));
+                            } catch (JSONException e) {
+                                callback.onFailed(e);
+                                return;
+                            }
                         }
-                    } catch (JSONException e) {
-                        callback.onFailed(e);
-                        return;
+                        callback.onSuccess(results);
                     }
-                }
-                callback.onSuccess(results);
-            }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString,
-                                  Throwable throwable) {
-                callback.onFailed(throwable);
-            }
-        });
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        callback.onFailed(throwable);
+                    }
+                });
     }
 
     /**
@@ -265,22 +251,15 @@ public class ParkAssistSDK {
         Map<String, String> params = new HashMap<>();
         params.put(PARAMS_LATITUDE, latitude);
         params.put(PARAMS_LONGITUDE, longitude);
-        ParkAssistHttpClient.getImage(generateGetURL(String.format(THUMBNAIL_ENDPOINT_FORMAT, uuid), params),
-                new BinaryHttpResponseHandler() {
+        httpClient.getImage(generateGetURL(String.format(THUMBNAIL_ENDPOINT_FORMAT, uuid), params),
+                new ParkAssistNetworkingInterface.ParkAssistImageResponseInterface() {
                     @Override
-                    public String[] getAllowedContentTypes() {
-                        String[] contentTypes = {"image/jpeg", "text/html; charset=utf-8"};
-                        return contentTypes;
+                    public void onSuccess(Bitmap image) {
+                        callback.onSuccess(image);
                     }
 
                     @Override
-                    public void onSuccess(int statusCode, Header[] headers, byte[] binaryData) {
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(binaryData, 0, binaryData.length);
-                        callback.onSuccess(bitmap);
-                    }
-
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, byte[] binaryData, Throwable error) {
+                    public void onFailure(Throwable error) {
                         callback.onFailed(error);
                     }
                 });
@@ -311,22 +290,16 @@ public class ParkAssistSDK {
         Map<String, String> params = new HashMap<>();
         params.put(PARAMS_LATITUDE, latitude);
         params.put(PARAMS_LONGITUDE, longitude);
-        ParkAssistHttpClient.get(generateGetURL(String.format(MAP_IMG_ENDPOINT_FORMAT, mapName), params),
-                new BinaryHttpResponseHandler() {
-                    @Override
-                    public String[] getAllowedContentTypes() {
-                        String[] contentTypes = {"image/jpeg", "text/html; charset=utf-8", "image/png"};
-                        return contentTypes;
-                    }
+        httpClient.getImage(generateGetURL(String.format(MAP_IMG_ENDPOINT_FORMAT, mapName), params),
+                new ParkAssistNetworkingInterface.ParkAssistImageResponseInterface() {
 
                     @Override
-                    public void onSuccess(int statusCode, Header[] headers, byte[] binaryData) {
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(binaryData, 0, binaryData.length);
+                    public void onSuccess(Bitmap bitmap) {
                         callback.onSuccess(bitmap);
                     }
 
                     @Override
-                    public void onFailure(int statusCode, Header[] headers, byte[] binaryData, Throwable error) {
+                    public void onFailure(Throwable error) {
                         callback.onFailed(error);
                     }
                 });

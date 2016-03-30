@@ -19,28 +19,13 @@ public class ParkingZone {
     private static final String NAME_KEY = "name";
 
     /**
-     *
-     * @param zoneJson JSONObject returned from server
-     * @return whether the JSON has the correct keys to create a ParkingZone object
-     */
-    public static boolean isValid(JSONObject zoneJson) {
-        return (zoneJson.has(ID_KEY)
-            && zoneJson.has(COUNT_KEY)
-            && zoneJson.has(NAME_KEY));
-    }
-
-    /**
      * creates ParkingZone object from JSON returned from server
      * @param zoneJson JSONObject from ParkAssist server
      */
-    public ParkingZone(JSONObject zoneJson) {
-        try {
-            this.mId = zoneJson.getInt(ID_KEY);
-            this.mZoneName = zoneJson.getString(NAME_KEY);
-            this.mSpaceCounts = new SpaceCounts(zoneJson.getJSONObject(COUNT_KEY));
-        } catch (JSONException e) {
-            Log.e(TAG, "Error encountered parsing JSON: " + e.getLocalizedMessage());
-        }
+    public ParkingZone(JSONObject zoneJson) throws JSONException{
+        this.mId = zoneJson.getInt(ID_KEY);
+        this.mZoneName = zoneJson.getString(NAME_KEY);
+        this.mSpaceCounts = new SpaceCounts(zoneJson.getJSONObject(COUNT_KEY));
     }
 
     /**
