@@ -35,7 +35,7 @@ public class ParkAssistSDK {
     private String mAppSecret;
     private String mSiteSlug;
     private String mDeviceId;
-    private ParkAssistHttpClient httpClient;
+    private ParkAssistNetworkingInterface httpClient;
 
     private static final String TAG = "ParkAssistSDK";
     private static final String SEARCH_ENDPOINT = "/search.json";

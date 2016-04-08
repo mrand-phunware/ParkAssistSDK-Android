@@ -9,17 +9,17 @@ public interface ParkAssistNetworkingInterface {
 
     /**
      * retrieve JSON response array from ParkAssist server
-     * @param URL relative URL path String
+     * @param path relative URL path String
      * @param responseHandler capable of passing along success data or failure throwable
      */
-    void getJSON(String URL, ParkAssistJSONResponseInterface responseHandler);
+    void getJSON(String path, ParkAssistJSONResponseInterface responseHandler);
 
     /**
      * retrieve image response from ParkAssist server
-     * @param URL relative URL path String
+     * @param path relative URL path String
      * @param responseHandler capable of passing along success data or failure throwable
      */
-    void getImage(String URL, ParkAssistImageResponseInterface responseHandler);
+    void getImage(String path, ParkAssistImageResponseInterface responseHandler);
 
 
     /**

@@ -18,7 +18,7 @@ public class ParkAssistHttpClient implements ParkAssistNetworkingInterface {
     private static AsyncHttpClient client = new AsyncHttpClient();
 
     @Override
-    public void getJSON(String URL, final ParkAssistJSONResponseInterface responseHandler) {
+    public void getJSON(String path, final ParkAssistJSONResponseInterface responseHandler) {
         JsonHttpResponseHandler httpHandler = new JsonHttpResponseHandler() {
 
             @Override
@@ -32,11 +32,11 @@ public class ParkAssistHttpClient implements ParkAssistNetworkingInterface {
                 responseHandler.onFailure(throwable);
             }
         };
-        client.get(getAbsoluteUrl(URL), httpHandler);
+        client.get(getAbsoluteUrl(path), httpHandler);
     }
 
     @Override
-    public void getImage(String URL, final ParkAssistImageResponseInterface responseHandler) {
+    public void getImage(String path, final ParkAssistImageResponseInterface responseHandler) {
         BinaryHttpResponseHandler imageHandler = new BinaryHttpResponseHandler() {
             @Override
             public String[] getAllowedContentTypes() {
@@ -53,7 +53,7 @@ public class ParkAssistHttpClient implements ParkAssistNetworkingInterface {
                 responseHandler.onFailure(error);
             }
         };
-        client.get(getAbsoluteUrl(URL), imageHandler);
+        client.get(getAbsoluteUrl(path), imageHandler);
     }
 
     private static String getAbsoluteUrl(String relativeUrl) {
