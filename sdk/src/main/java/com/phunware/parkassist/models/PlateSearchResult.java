@@ -42,17 +42,13 @@ public class PlateSearchResult {
      * Create search result object from server JSON
      * @param jsonObject JSONObject returned from ParkAssist API
      */
-    public PlateSearchResult(JSONObject jsonObject) {
-        try {
-            this.mBayGroup = jsonObject.getString(BAY_GROUP_KEY);
-            this.mBayId = jsonObject.getInt(BAY_ID_KEY);
-            this.mUuid = jsonObject.getString(UUID_KEY);
-            this.mMapName = jsonObject.getString(MAP_NAME_KEY);
-            this.mZone = jsonObject.getString(ZONE_KEY);
-            this.mPosition = new Position(jsonObject.getJSONObject(POSITION_KEY));
-        } catch (JSONException e) {
-            Log.e(TAG, "Error parsing JSON: " + e.getLocalizedMessage());
-        }
+    public PlateSearchResult(JSONObject jsonObject) throws JSONException{
+        this.mBayGroup = jsonObject.getString(BAY_GROUP_KEY);
+        this.mBayId = jsonObject.getInt(BAY_ID_KEY);
+        this.mUuid = jsonObject.getString(UUID_KEY);
+        this.mMapName = jsonObject.getString(MAP_NAME_KEY);
+        this.mZone = jsonObject.getString(ZONE_KEY);
+        this.mPosition = new Position(jsonObject.getJSONObject(POSITION_KEY));
     }
 
     /**
