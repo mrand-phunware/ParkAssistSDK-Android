@@ -1,18 +1,18 @@
-package com.phunware.parkassist.networking;
+package com.phunware.parkassistdemo.networking;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.BinaryHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.phunware.parkassist.networking.ParkAssistNetworkingInterface;
 
 import org.json.JSONArray;
-
 
 import cz.msebera.android.httpclient.Header;
 
 /**
- * Created by mrand on 3/10/16.
+ * Created by mrand on 4/8/16.
  */
-public class ParkAssistHttpClient implements ParkAssistNetworkingInterface {
+public class CustomNetworkingImplementation implements ParkAssistNetworkingInterface {
     private static final String BASE_URL = "https://insights.parkassist.com/find_your_car";
 
     private static AsyncHttpClient client = new AsyncHttpClient();
@@ -59,4 +59,5 @@ public class ParkAssistHttpClient implements ParkAssistNetworkingInterface {
     private static String getAbsoluteUrl(String relativeUrl) {
         return BASE_URL + relativeUrl;
     }
+
 }

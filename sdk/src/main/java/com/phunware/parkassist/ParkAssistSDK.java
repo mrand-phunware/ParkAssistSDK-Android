@@ -8,7 +8,6 @@ import android.util.Log;
 import com.phunware.parkassist.models.ParkingZone;
 import com.phunware.parkassist.models.PlateSearchResult;
 import com.phunware.parkassist.networking.Callback;
-import com.phunware.parkassist.networking.ParkAssistHttpClient;
 import com.phunware.parkassist.networking.ParkAssistNetworkingInterface;
 
 import org.json.JSONArray;
@@ -54,11 +53,12 @@ public class ParkAssistSDK {
      *
      * @param appSecret Your shared secret key
      * @param siteSlug String identifying the parking facility
+     * @param httpClient Custom implementation of ParkAssistNetworkingInterface
      */
-    public ParkAssistSDK(String appSecret, String siteSlug) {
+    public ParkAssistSDK(String appSecret, String siteSlug, ParkAssistNetworkingInterface httpClient) {
         this.mAppSecret = appSecret;
         this.mSiteSlug = siteSlug;
-        this.httpClient = new ParkAssistHttpClient();
+        this.httpClient = httpClient;
     }
 
     /**
