@@ -1,5 +1,7 @@
 package com.phunware.parkassist;
 
+import android.graphics.Bitmap;
+
 import com.phunware.parkassist.models.ParkingZone;
 import com.phunware.parkassist.models.PlateSearchResult;
 import com.phunware.parkassist.networking.Callback;
@@ -8,10 +10,10 @@ import com.phunware.parkassist.networking.ParkAssistNetworkingInterface;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.exceptions.ExceptionIncludingMockitoWarnings;
@@ -19,6 +21,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -27,8 +31,17 @@ import static org.mockito.Mockito.*;
  * Created by mrand on 3/30/16.
  */
 public class ParkAssistUnitTests {
-    @Mock private ParkAssistNetworkingInterface networkingInterface;
 
+    private CountDownLatch latch;
+    private ParkAssistNetworkingInterface testNetworkInterface;
+    private ParkAssistSDK testSDK;
+
+    @Before
+    public void setUp() throws Exception {
+        latch = new CountDownLatch(1);
+        testNetworkInterface = Mockito.mock(ParkAssistNetworkingInterface.class);
+        testSDK = new ParkAssistSDK("blah", "blah", testNetworkInterface);
+    }
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
@@ -103,14 +116,6 @@ public class ParkAssistUnitTests {
     public void parseInvalidZone() throws Exception {
         //given
         JSONObject invalidZone = new JSONObject();
-        JSONObject countsObject = new JSONObject();
-        countsObject.put("available", 5);
-        countsObject.put("out_of_service", 3);
-        countsObject.put("reserved", 0);
-        countsObject.put("timestamp", "2013-08-19T11:45:06.8120000-04:00");
-        countsObject.put("total", 200);
-        countsObject.put("vacant", 80);
-        invalidZone.put("counts", countsObject);
         invalidZone.put("id", 3);
         invalidZone.put("name", "Level 3");
 
@@ -121,9 +126,7 @@ public class ParkAssistUnitTests {
 
     @Test
     public void testNetworkSuccessCallsCallbackSuccess() throws Exception {
-        //when
-        ParkAssistNetworkingInterface network  = Mockito.mock(ParkAssistNetworkingInterface.class);
-        ParkAssistSDK sdk12 = new ParkAssistSDK("blah", "blah", network);
+        //given
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -133,14 +136,15 @@ public class ParkAssistUnitTests {
                 responseInterface.onSuccess(new JSONArray());
                 return null;
             }
-        }).when(network).getJSON(any(String.class), any(ParkAssistNetworkingInterface
+        }).when(testNetworkInterface).getJSON(any(String.class), any(ParkAssistNetworkingInterface
                 .ParkAssistJSONResponseInterface.class));
-
-        sdk12.searchPlates("ZZZ", new Callback<List<PlateSearchResult>>() {
+        //when
+        testSDK.searchPlates("ZZZ", new Callback<List<PlateSearchResult>>() {
             @Override
             public void onSuccess(List<PlateSearchResult> data) {
                 //then
                 assertNotNull(data);
+                latch.countDown();
             }
 
             @Override
@@ -148,5 +152,114 @@ public class ParkAssistUnitTests {
                 fail();
             }
         });
+        latch.await(5, TimeUnit.SECONDS);
+        assertEquals(latch.getCount(), 0);
+    }
+
+    @Test
+    public void testLessThanThreeCharsFails() throws  Exception {
+        //when
+        testSDK.searchPlates("BB", new Callback<List<PlateSearchResult>>() {
+            @Override
+            public void onSuccess(List<PlateSearchResult> data) {
+                fail();
+            }
+
+            @Override
+            public void onFailed(Throwable e) {
+                //then
+                assertNotNull(e);
+                latch.countDown();
+            }
+        });
+        latch.await(5, TimeUnit.SECONDS);
+        assertEquals(latch.getCount(), 0);
+    }
+
+    @Test
+    public void testResponseFailureCallsCallbackFailure() throws Exception {
+        //given
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                ParkAssistNetworkingInterface.ParkAssistJSONResponseInterface jsonInterface =
+                        (ParkAssistNetworkingInterface.ParkAssistJSONResponseInterface)invocation
+                                .getArguments()[1];
+                jsonInterface.onFailure(new Error("failboat"));
+                return null;
+            }
+        })
+                .when(testNetworkInterface).getJSON(any(String.class),
+                any(ParkAssistNetworkingInterface.ParkAssistJSONResponseInterface.class));
+
+        //when
+        testSDK.searchPlates("BBB", new Callback<List<PlateSearchResult>>() {
+            //then
+            @Override
+            public void onSuccess(List<PlateSearchResult> data) {
+                fail();
+            }
+
+            @Override
+            public void onFailed(Throwable e) {
+                assertEquals(e.getMessage(), "failboat");
+                latch.countDown();
+            }
+        });
+        latch.await(5, TimeUnit.SECONDS);
+        assertEquals(0, latch.getCount());
+    }
+
+    @Test
+    public void testImageSuccess() throws Exception {
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                ParkAssistNetworkingInterface.ParkAssistImageResponseInterface imageInterface = (ParkAssistNetworkingInterface.ParkAssistImageResponseInterface)invocation.getArguments()[1];
+                imageInterface.onSuccess(new byte[3]);
+                return null;
+            }
+        })
+                .when(testNetworkInterface).getImage(anyString(), any(ParkAssistNetworkingInterface.ParkAssistImageResponseInterface.class));
+        testSDK.getMapImage("map", new Callback<Bitmap>() {
+            @Override
+            public void onSuccess(Bitmap data) {
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailed(Throwable e) {
+                fail(e.getMessage());
+            }
+        });
+        latch.await(5, TimeUnit.SECONDS);
+        assertEquals(0, latch.getCount());
+    }
+
+    @Test
+    public void testImageFailure() throws Exception {
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                ParkAssistNetworkingInterface.ParkAssistImageResponseInterface imageInterface = (ParkAssistNetworkingInterface.ParkAssistImageResponseInterface)invocation.getArguments()[1];
+                imageInterface.onFailure(new Error("imageFail"));
+                return null;
+            }
+        })
+                .when(testNetworkInterface).getImage(anyString(), any(ParkAssistNetworkingInterface.ParkAssistImageResponseInterface.class));
+        testSDK.getMapImage("map", new Callback<Bitmap>() {
+            @Override
+            public void onSuccess(Bitmap data) {
+                fail();
+            }
+
+            @Override
+            public void onFailed(Throwable e) {
+                assertEquals(e.getMessage(), "imageFail");
+                latch.countDown();
+            }
+        });
+        latch.await(5, TimeUnit.SECONDS);
+        assertEquals(0, latch.getCount());
     }
 }

@@ -226,6 +226,7 @@ public class ParkAssistSDK {
 
     /**
      * returns a low-resolution image of a search result vehicle
+     * note that Bitmap will be null if image data is corrupt
      *
      * @param uuid Unique identifier associated with search result
      *
@@ -238,6 +239,7 @@ public class ParkAssistSDK {
 
     /**
      * returns a low-resolution image of a search result vehicle
+     * note that Bitmap will be null if image data is corrupt
      *
      * @param location Location object representing the latitude and longitude of device making
      *                 the request
@@ -269,6 +271,8 @@ public class ParkAssistSDK {
 
     /**
      * returns an image of a map at the parking facility
+     * note that Bitmap will be null if image data is corrupt
+     *
      *
      * @param mapName Name of the requested map
      * @param callback Callback object, success block receives a Bitmap image of the map
@@ -280,6 +284,7 @@ public class ParkAssistSDK {
 
     /**
      * returns an image of a map at the parking facility
+     * note that Bitmap will be null if image data is corrupt
      *
      * @param location Location object representing latitude and longitude of device making the
      *                 request
@@ -294,7 +299,6 @@ public class ParkAssistSDK {
         params.put(PARAMS_LONGITUDE, longitude);
         httpClient.getImage(generateGetURL(String.format(MAP_IMG_ENDPOINT_FORMAT, mapName), params),
                 new ParkAssistNetworkingInterface.ParkAssistImageResponseInterface() {
-
                     @Override
                     public void onSuccess(byte[] imageData) {
                         Bitmap bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
