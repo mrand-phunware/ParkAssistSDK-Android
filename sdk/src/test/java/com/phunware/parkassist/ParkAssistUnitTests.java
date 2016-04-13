@@ -2,19 +2,33 @@ package com.phunware.parkassist;
 
 import com.phunware.parkassist.models.ParkingZone;
 import com.phunware.parkassist.models.PlateSearchResult;
+import com.phunware.parkassist.networking.Callback;
+import com.phunware.parkassist.networking.ParkAssistNetworkingInterface;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.internal.exceptions.ExceptionIncludingMockitoWarnings;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by mrand on 3/30/16.
  */
 public class ParkAssistUnitTests {
+    @Mock private ParkAssistNetworkingInterface networkingInterface;
+
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
@@ -59,17 +73,6 @@ public class ParkAssistUnitTests {
 
         exception.expect(JSONException.class);
         PlateSearchResult result = new PlateSearchResult(invalidObject);
-
-        //when
-//        JSONException uuidException = null;
-//        try {
-//            PlateSearchResult result = new PlateSearchResult(invalidObject);
-//        } catch (JSONException e) {
-//            uuidException = e;
-//        } finally {
-//            //then
-//            assertNotNull(uuidException);
-//        }
     }
 
     @Test
@@ -114,6 +117,36 @@ public class ParkAssistUnitTests {
         //when
         exception.expect(JSONException.class);
         ParkingZone zone = new ParkingZone(invalidZone);
+    }
 
+    @Test
+    public void testNetworkSuccessCallsCallbackSuccess() throws Exception {
+        //when
+        ParkAssistNetworkingInterface network  = Mockito.mock(ParkAssistNetworkingInterface.class);
+        ParkAssistSDK sdk12 = new ParkAssistSDK("blah", "blah", network);
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                ParkAssistNetworkingInterface.ParkAssistJSONResponseInterface responseInterface =
+                        (ParkAssistNetworkingInterface.ParkAssistJSONResponseInterface)invocation
+                                .getArguments()[1];
+                responseInterface.onSuccess(new JSONArray());
+                return null;
+            }
+        }).when(network).getJSON(any(String.class), any(ParkAssistNetworkingInterface
+                .ParkAssistJSONResponseInterface.class));
+
+        sdk12.searchPlates("ZZZ", new Callback<List<PlateSearchResult>>() {
+            @Override
+            public void onSuccess(List<PlateSearchResult> data) {
+                //then
+                assertNotNull(data);
+            }
+
+            @Override
+            public void onFailed(Throwable e) {
+                fail();
+            }
+        });
     }
 }
