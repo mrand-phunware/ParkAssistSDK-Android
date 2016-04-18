@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.phunware.parkassist.*;
+import com.phunware.parkassist.BuildConfig;
 import com.phunware.parkassist.models.ParkingZone;
 import com.phunware.parkassist.models.PlateSearchResult;
 import com.phunware.parkassist.networking.Callback;
@@ -40,8 +41,8 @@ public class MainActivity extends AppCompatActivity {
         Button searchButton = (Button)findViewById(R.id.submit_search_button);
         Button zoneButton = (Button)findViewById(R.id.zone_button);
         Button signButton = (Button)findViewById(R.id.sign_button);
-
-        mParkSDK = StaticSDK.getInstance(getString(R.string.app_secret), getString(R.string.site_slug));
+        boolean isTest = getIntent().hasExtra("Testing");
+        mParkSDK = StaticSDK.getInstance(getString(R.string.app_secret), getString(R.string.site_slug), isTest);
         final Callback<List<PlateSearchResult>> plateCallback = new Callback<List<PlateSearchResult>>() {
             @Override
             public void onSuccess(List<PlateSearchResult> data) {

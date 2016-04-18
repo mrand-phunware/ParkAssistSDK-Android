@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Park Assist Demo</string>
+    <string name="app_secret">secreto</string>
+    <string name="site_slug">ft-lauderdale</string>
+</resources>
