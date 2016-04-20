@@ -75,6 +75,22 @@ public class ParkingZone {
 
     /**
      *
+     * @return number of occupied spaces in zone
+     */
+    public int getOccupiedSpaces() {
+        return mSpaceCounts.occupied;
+    }
+
+    /**
+     *
+     * @return number of spaces in zone that are out of service
+     */
+    public int getOutOfServiceSpaces() {
+        return mSpaceCounts.outOfService;
+    }
+
+    /**
+     *
      * @return number of reserved spaces in zone
      */
     public int getReservedSpaces() {
